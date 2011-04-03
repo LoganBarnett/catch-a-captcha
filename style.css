@@ -64,12 +64,13 @@ a:hover { text-decoration: underline; color: #aaa; }
 }
 
 #log {
-float: left;
+  float: none;
   display: block;
   /* enough padding to clear the toolbar.. is there a better way to do this? */
   padding-bottom: 5.1em; 
   background: inherit;
   overflow: hidden;
+  width: *px;
 }
 
 /* not very important info */
@@ -108,4 +109,18 @@ float: left;
 
 #usersLink {
   color: inherit;
+}
+
+#drawing-area { float: left; width: 510px;}
+#canvas{
+  cursor: crosshair;
+  border:black solid 1px;
+  background-color: white;
+}
+#clr div{
+  cursor:pointer;
+  cursor:hand;
+  width:20px;
+  height:20px;
+  float:left;
 }
