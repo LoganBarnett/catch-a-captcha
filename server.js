@@ -14,7 +14,7 @@ setInterval(function () {
 var fu = require("./fu"),
     sys = require("sys"),
     url = require("url"),
-    qs = require("querystring");
+    qs = require("./querystring");
 
 var MESSAGE_BACKLOG = 200,
     SESSION_TIMEOUT = 60 * 1000;
@@ -39,6 +39,9 @@ var channel = new function () {
         break;
       case "part":
         sys.puts(nick + " part");
+        break;
+      case "draw":
+        sys.puts(nick + " draw " + "from " + text.from.x + ", " + text.from.y + " to: " + text.to.x + ", " + text.to.y);
         break;
     }
 
@@ -125,6 +128,7 @@ fu.listen(Number(process.env.PORT || PORT), HOST);
 fu.get("/", fu.staticHandler("index.html"));
 fu.get("/style.css", fu.staticHandler("style.css"));
 fu.get("/client.js", fu.staticHandler("client.js"));
+fu.get("/json2.js", fu.staticHandler("json2.js"));
 fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
 
 
@@ -205,5 +209,23 @@ fu.get("/send", function (req, res) {
   session.poke();
 
   channel.appendMessage(session.nick, "msg", text);
+  res.simpleJSON(200, { rss: mem.rss });
+});
+
+fu.get("/draw", function (req, res) {
+  var message = qs.parse(url.parse(req.url).query);
+
+  var id = message.id;
+  var text = message.text;
+  var session = sessions[id];
+
+  if (!session || !text) {
+    res.simpleJSON(400, { error: "No such session id" });
+    return;
+  }
+
+  session.poke();
+
+  channel.appendMessage(session.nick, "draw", text);
   res.simpleJSON(200, { rss: mem.rss });
 });

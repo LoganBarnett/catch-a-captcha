@@ -64,6 +64,7 @@ a:hover { text-decoration: underline; color: #aaa; }
 }
 
 #log {
+float: left;
   display: block;
   /* enough padding to clear the toolbar.. is there a better way to do this? */
   padding-bottom: 5.1em; 

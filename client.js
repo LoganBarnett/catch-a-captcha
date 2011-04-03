@@ -142,6 +142,17 @@ function userPart(nick, timestamp) {
   updateUsersLink();
 }
 
+function drawFromNetwork(from, to) {
+  var canvas = document.getElementById("canvas"); // TODO: use $()?
+  var context = canvas.getContext("2d");
+  context.lineWidth = 5;
+  context.lineCap = "round";
+  context.beginPath();
+  context.moveTo(from.x, from.y);
+  context.lineTo(to.x, to.y);
+  context.stroke();
+}
+
 // utility functions
 
 util = {
@@ -214,7 +225,7 @@ function addMessage (from, text, time, _class) {
     messageElement.addClass(_class);
 
   // sanitize
-  text = util.toStaticHTML(text);
+  // text = util.toStaticHTML(text);
 
   // If the current user said this, add a special css class
   var nick_re = new RegExp(CONFIG.nick);
@@ -299,6 +310,9 @@ function longPoll (data) {
         case "part":
           userPart(message.nick, message.timestamp);
           break;
+        case "draw":
+          drawFromNetwork(message.text.from, message.text.to);
+          break;
       }
     }
     //update the document title to include unread message count if blurred
@@ -340,7 +354,7 @@ function send(msg) {
   if (CONFIG.debug === false) {
     // XXX should be POST
     // XXX should add to messages immediately
-    jQuery.get("/send", {id: CONFIG.id, text: msg}, function (data) { }, "json");
+    jQuery.get("/send", {id: CONFIG.id, text: msg.replace(/\'/g, "&#39;")}, function (data) { }, "json");
   }
 }
 
@@ -362,6 +376,7 @@ function showLoad () {
 //transition the page to the main chat view, putting the cursor in the textfield
 function showChat (nick) {
   $("#toolbar").show();
+  $("#drawing-area").show();
   $("#entry").focus();
 
   $("#connect").hide();
@@ -469,8 +484,8 @@ $(document).ready(function() {
            , dataType: "json"
            , url: "/join"
            , data: { nick: nick }
-           , error: function () {
-               alert("error connecting to server");
+           , error: function (jqXHR, textStatus, errorThrown) {
+               alert("error connecting to server: " + errorThrown);
                showConnect();
              }
            , success: onConnect
